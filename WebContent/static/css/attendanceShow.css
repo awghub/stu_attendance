@@ -1,0 +1,11 @@
+@charset "UTF-8";
+
+.show-attendance-box{
+    margin: 2% 3%;
+}
+
+.layui-table-page {
+    height: auto !important;
+    text-align: center;
+    padding: 10px 0;
+}

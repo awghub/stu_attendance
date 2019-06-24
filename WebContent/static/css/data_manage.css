@@ -1,0 +1,8 @@
+#dataTable{width:99%;border:1px solid #AACDED;border-collapse:collapse;font-size:12px;margin-left:3px;}
+#dataTable th{background-color:#EBF4FB;font-size:13px;color:#444;font-weight:normal;}
+#dataTable td,th{border:1px solid #AACDED;padding:3px;}
+.pagerTd{text-align:center;height:25px;line-height:25px;border-bottom:0px;}
+.opDiv span input{border:0px;}
+.opDiv span{border:1px solid #AACDED;padding:1px 1px 1px 19px;margin-right:3px;background:url(../images/search_ico.gif) no-repeat 0% 50%;}
+.opDiv input,span {vertical-align: middle;}
+.buttonDiv{float:right;width:400px;text-align: right;padding-right:3px;}

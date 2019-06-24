@@ -1,0 +1,31 @@
+.addTable {
+	font-size: 13px;
+	width: 100%;
+}
+
+.addTable .name_td {
+	font-weight: bold;
+	text-indent: 1em;
+}
+
+.addTable td {
+	height: 40px;
+	line-height: 40px;
+	border-bottom: 1px dashed #CBCCCE;
+	padding: 3px;
+}
+
+input,textarea {
+	border: 1px solid #ADAEB0;
+}
+
+.addTable .input_file {
+	border: 1px solid #ADAEB0;
+	background-color: #fff;
+	width: 500px;
+}
+
+.addTable .input_checkbox,.input_radio {
+	border: 0px;
+	vertical-align: center;
+}

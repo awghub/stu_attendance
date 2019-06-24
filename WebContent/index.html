@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta http-equiv="X-UA-Compatible" content="ie=edge">
+		<meta http-equiv="pragma" content="no-cache">
+		<meta http-equiv="cache-control" content="no-cache">
+		<meta http-equiv="expires" content="0">
+		<title>教务管理系统后台管理界面</title>
+	</head>
+
+	<style type="text/css">
+		body {
+			width: 100%;
+			height: 100%;
+			margin: 0px;
+			background-color: #9FC0EC;
+			text-align: center;
+		}
+		
+		#top_div {
+			position: relative;
+			top: 0px;
+			height: 90px;
+			text-align: left;
+			margin-left: auto;
+			margin-right: auto;
+			width: 1000px;
+		}
+		
+		#border_div {
+			position: relative;
+			top: 0px;
+			width: 100%;
+			height: 26px;
+			background: url(static/images/middle.png) repeat-x 0 100%;
+		}
+		
+		#middle_div {
+			position: relative;
+			padding: 10px;
+			border: 0px;
+			width: 1000px;
+			height: 530px;
+			text-align: left;
+			margin-left: auto;
+			margin-right: auto;
+		}
+		
+		#bottom_div {
+			position: relative;
+			clear: both;
+			width: 100%;
+			height: 25px;
+			text-align: center;
+			font-size: 12px;
+			line-height: 25px;
+			background: url(static/images/middle.jpg) repeat-x 0% 35% #9FC0EC;
+			padding-top: -50px;
+		}
+		
+		#middle_left_div {
+			width: 210px;
+			height: 100%;
+			border: 1px ridge #9FC0EC;
+			display: block;
+			background: url(static/images/macback.png);
+			float: left;
+		}
+		
+		#middle_center_div {
+			width: 15px;
+			padding-left: 5px;
+			height: 100%;
+			float: left;
+		}
+		
+		#middle_center_div img {
+			margin-top: 180px;
+			vertical-align: middle;
+		}
+		
+		#middle_right_div {
+			width: 766px;
+			height: 100%;
+			float: left;
+			border: 1px ridge #9FC0EC;
+		}
+		
+		.title_div {
+			border: 0px;
+			height: 24px;
+			line-height: 24px;
+			text-indent: 1em;
+			color: #fff;
+			font-weight: bold;
+			font-size: 14px;
+			background: url(static/images/menubar.png) repeat-x 0 0;
+		}
+		
+		#middle_left_div ul {
+			margin: 0px;
+			padding: 0px;
+			list-style: none;
+			background-color: #F0F0F0;
+		}
+		
+		#middle_left_div a {
+			margin-left: 0px;
+			display: block;
+			color: #1276C6;
+			height: 20px;
+			line-height: 16px;
+			font-size: 14px;
+			text-decoration: none;
+			border-bottom: 1px dashed #ccc;
+			margin: 3px 0px 3px 0px;
+			text-align: left;
+			text-indent: 40px;
+			background: url(static/images/doc.gif) no-repeat 24px 1px #F0F0F0;
+			background: url();
+			padding: 3px;
+		}
+		
+		#middle_left_div a:hover {
+			height: 16px;
+			line-height: 16px;
+			color: #f00;
+			border-bottom: 1px solid #ccc;
+			background-color: #7EC9FC;
+			background: url(static/images/doc_red.gif) no-repeat 24px 1px;
+		}
+		
+		#middle_center_div img {
+			cursor: pointer;
+		}
+		
+		#userInfo {
+			height: 40px;
+			line-height: 15px;
+			background: url(static/images/macback.png) #F0F0F0;
+			padding: 10px 0px 0px 5px;
+			font-size: 13px;
+			padding-left: 2em;
+		}
+	</style>
+	<script type="text/javascript">
+		var width_before = "766px";
+		var width_hidden = "978px";
+		function close_open_leftmenu(imgBtn) {
+			var left_div = document.getElementById("middle_left_div");
+			var right_div = document.getElementById("middle_right_div");
+			if(left_div != null && right_div != null) {
+				if(left_div.style.display == 'block' || left_div.style.display == '') {
+					left_div.style.display = "none";
+					right_div.style.width = width_hidden;
+					imgBtn.src = "static/images/open_left.gif";
+					imgBtn.title = "展开左边";
+				} else {
+					left_div.style.display = "block";
+					right_div.style.width = width_before;
+					imgBtn.src = "static/images/close_left.gif";
+					imgBtn.title = "折叠左边";
+				}
+			}
+		}
+
+		function loadImage() {
+			var imgs = ["static/images/doc.gif",
+				"static/images/doc_red.gif",
+				"static/images/open_left.gif",
+				"static/images/close_left.gif"
+			];
+			for(var i = 0; i < imgs.length; i++) {
+				var img = new Image();
+				img.src = imgs[i];
+			}
+		}
+
+		function setPageSize() {
+			var width = parseInt(window.screen.width);
+			var height = parseInt(window.screen.height);
+			if(width > 1024) {
+				document.getElementById("top_div").style.width = "1256px";
+				document.getElementById("middle_div").style.width = "1256px";
+				document.getElementById("middle_right_div").style.width = "1022px";
+				width_before = "1022px";
+				width_hidden = "1234px";
+			}
+		}
+
+		function loadPage() {
+			loadImage();
+			setPageSize();
+		}
+	</script>
+	</head>
+
+	<body onload="loadPage()">
+		<div id="top_div">
+			<img src="static/images/logo.gif" />
+		</div>
+		<div id="userInfo" align="left">
+			登录用户：<br/> 登录时间：
+		</div>
+		<div id="border_div"></div>
+		<div id="middle_div">
+			<div id="middle_left_div">
+
+				<div class="title_div">
+					人员管理
+				</div>
+				<ul>
+					<li>
+						<a href="#" target="mainFrame">添加人员信息</a>
+					</li>
+					<li>
+						<a href="#" target="mainFrame">人员信息管理</a>
+					</li>
+				</ul>
+				<div class="title_div">
+					班级管理
+				</div>
+				<ul>
+					<li>
+						<a href="#" target="mainFrame">添加班级信息</a>
+					</li>
+					<li>
+						<a href="#" target="mainFrame">班级信息管理</a>
+					</li>
+				</ul>
+				<div class="title_div">
+					学生管理
+				</div>
+				<ul>
+					<li>
+						<a href="#" target="mainFrame">添加学生信息</a>
+					</li>
+					<li>
+						<a href="#" target="mainFrame">学生信息管理</a>
+					</li>
+				</ul>
+				<div class="title_div">
+					考勤管理
+				</div>
+				<ul>
+					<li>
+						<a href="attendance.html" target="_blank">考勤信息管理</a>
+					</li>
+				</ul>
+				<div class="title_div">
+					就业管理
+				</div>
+				<ul>
+					<li>
+						<a href="#" target="mainFrame">添加就业信息</a>
+					</li>
+					<li>
+						<a href="#" target="mainFrame">就业信息管理</a>
+					</li>
+				</ul>
+				<div class="title_div">
+					系统管理
+				</div>
+				<ul>
+					<li>
+						<a href="#" target="mainFrame">修改密码</a>
+					</li>
+					<li>
+						<a href="#" target="mainFrame">修改用户名</a>
+					</li>
+					<li>
+						<a href="#" target="_top">退出系统</a>
+					</li>
+				</ul>
+			</div>
+			<div id="middle_center_div">
+				<img src="static/images/close_left.gif" title="折叠左边" onclick="close_open_leftmenu(this);" />
+			</div>
+		</div>
+		<div id="bottom_div">金智教务系统网站，版权&copy;归龚益波所有</div>
+	</body>
+
+</html>

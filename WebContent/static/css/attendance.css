@@ -1,0 +1,11 @@
+@charset "UTF-8";
+
+.layui-nav{
+	border-radius: 0;
+}
+.left-nav{
+	padding-top: 60px;
+}
+.top-nav, .iframe-box{
+	margin-left: 200px;
+}

@@ -1,0 +1,20 @@
+@charset "UTF-8";
+.layui-colla-icon{
+    display: none;
+}
+
+.attendance-form{
+    margin: 2% 5%;
+}
+
+.attendance-form > form > div{
+    margin-bottom: 1%;
+}
+
+.attendance-form .layui-form-label{
+    width: 150px !important;
+}
+
+.attendance-form .layui-input-block{
+    margin-left: 150px !important;
+}
