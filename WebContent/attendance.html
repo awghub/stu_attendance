@@ -23,9 +23,12 @@
     <!-- 顶部导航栏begin -->
     <ul class="layui-nav top-nav">
         <li class="layui-nav-item layui-col-xs-offset9 layui-col-md-offset11">
-            <a href=""><img src="static/images/head_img.jpg" class="layui-nav-img">张三</a>
+            <a href="javascript:void(0);">
+            	<img src="static/images/head_img.jpg" class="layui-nav-img teacher-img">
+            	<span class="teacher-name">张三</span>
+            </a>
             <dl class="layui-nav-child">
-                <dd>
+                <dd class="logout">
                     <a href="javascript:void(0);">退出登录</a>
                 </dd>
             </dl>
@@ -35,18 +38,18 @@
     <!-- 左侧垂直导航栏begin -->
     <ul class="layui-nav layui-nav-tree layui-nav-side left-nav" lay-filter="demo">
         <li class="layui-nav-item layui-nav-itemed">
-            <a href="javascript:;">
+            <a href="javascript:void(0);">
                 <i class="layui-icon layui-icon-chart-screen" style="font-size: 24px; color: #B5BCA5;vertical-align: middle;"></i> 
                 &nbsp;学生考勤系统
             </a>
             <dl class="layui-nav-child">
-                <dd class="addRecord">
+                <dd>
                     <a href="javascript:void(0);" data-url="attendanceAdd.html">
-                    <i class="layui-icon layui-icon-add-1" style="font-size: 18px; color: #B5BCA5;vertical-align: middle;"></i> 
-                    &nbsp;添加考勤记录
-                </a>
+                    	<i class="layui-icon layui-icon-add-1" style="font-size: 18px; color: #B5BCA5;vertical-align: middle;"></i> 
+                    	&nbsp;添加考勤记录
+                	</a>
                 </dd>
-                <dd class="showOrDelRecord">
+                <dd>
                     <a href="javascript:void(0);" data-url="attendanceShow.html">
                         <i class="layui-icon layui-icon-senior" style="font-size: 18px; color: #B5BCA5;vertical-align: middle;"></i> 
                         &nbsp;查看/删除考勤记录
