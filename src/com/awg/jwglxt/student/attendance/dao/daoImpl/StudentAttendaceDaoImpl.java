@@ -39,6 +39,7 @@ public class StudentAttendaceDaoImpl implements StudentAttendaceDao {
             Grade grade = new Grade(rs.getString("grade_name"), rs.getInt("nowstudent"), rs.getString("teacher_name"));
             grades.add(grade);
         }
+        C3P0Utils.closeAll(rs, psmt, connection);
         return grades;
     }
 
@@ -57,6 +58,7 @@ public class StudentAttendaceDaoImpl implements StudentAttendaceDao {
             Student student = new Student(rs.getString("stu_id"), rs.getString("stu_name"), rs.getInt("stu_gender"), rs.getInt("stu_age"), rs.getString("stu_tel"), rs.getString("stu_where"), rs.getInt("stu_type"), rs.getString("grade_name"), rs.getString("teacher_name"));
             students.add(student);
         }
+        C3P0Utils.closeAll(rs, psmt, connection);
         return students;
     }
 
@@ -74,6 +76,7 @@ public class StudentAttendaceDaoImpl implements StudentAttendaceDao {
             StudentAttendanceType studentAttendanceType = new StudentAttendanceType(rs.getInt("pk_student_attendance_type_id"),rs.getString("student_attendance_type_name"));
             studentAttendanceTypes.add(studentAttendanceType);
         }
+        C3P0Utils.closeAll(rs, psmt, connection);
         return studentAttendanceTypes;
     }
 
@@ -91,12 +94,13 @@ public class StudentAttendaceDaoImpl implements StudentAttendaceDao {
         if (rs.next()) {
             count = rs.getInt("nowCount");
         }
+        C3P0Utils.closeAll(rs, psmt, connection);
         return count;
     }
 
     @Override
     public int insertStudentAttendance(StudentAttendance studentAttendance) throws Exception {
-        // 考勤流水号
+    	// 考勤流水号
         String attendanceId = studentAttendance.getAttendanceId();
         // 学生ID
         String studentId = studentAttendance.getStudent().getStuId();
@@ -130,7 +134,9 @@ public class StudentAttendaceDaoImpl implements StudentAttendaceDao {
         psmt.setLong(6, attendanceActualTimeLength);
         psmt.setString(7, attendanceDescription);
         psmt.setInt(8, attendanceStatus);
-        return psmt.executeUpdate();
+        int result = psmt.executeUpdate();
+        C3P0Utils.closeAll(null, psmt, connection);
+        return result;
     }
 
     @Override
@@ -149,6 +155,7 @@ public class StudentAttendaceDaoImpl implements StudentAttendaceDao {
             //studentAttendance = new StudentAttendance(rs.getDate("attendance_default_start_time"), rs.getDate("attendance_default_end_time"));
             studentAttendance = new StudentAttendance(rs.getTime("attendance_default_start_time"), rs.getTime("attendance_default_end_time"));
         }
+        C3P0Utils.closeAll(rs, psmt, connection);
         return studentAttendance;
     }
 
@@ -200,6 +207,7 @@ public class StudentAttendaceDaoImpl implements StudentAttendaceDao {
             studentAttendance = new StudentAttendance(rs.getString("pk_attendance_id"), student, studentAttendanceType, rs.getTime("attendance_default_start_time"), rs.getTime("attendance_default_end_time"), rs.getTime("attendance_actual_start_time"), rs.getTime("attendance_actual_end_time"), rs.getLong("attendance_actual_time_length"), rs.getString("attendance_description"));
             studentAttendances.add(studentAttendance);
         }
+        C3P0Utils.closeAll(rs, psmt, connection);
         return studentAttendances;
     }
 
@@ -246,6 +254,7 @@ public class StudentAttendaceDaoImpl implements StudentAttendaceDao {
             studentAttendanceType = new StudentAttendanceType(rs.getInt("pk_student_attendance_type_id"), rs.getString("student_attendance_type_name"));
             studentAttendance = new StudentAttendance(rs.getString("pk_attendance_id"), student, studentAttendanceType, rs.getTime("attendance_default_start_time"), rs.getTime("attendance_default_end_time"), rs.getTime("attendance_actual_start_time"), rs.getTime("attendance_actual_end_time"), rs.getLong("attendance_actual_time_length"), rs.getString("attendance_description"));
         }
+        C3P0Utils.closeAll(rs, psmt, connection);
         return studentAttendance;
     }
 
@@ -284,7 +293,10 @@ public class StudentAttendaceDaoImpl implements StudentAttendaceDao {
         psmt.setLong(4, attendanceActualTimeLength);
         psmt.setString(5, attendanceDescription);
         psmt.setString(6, attendanceId);
-        return psmt.executeUpdate();
+        
+        int result = psmt.executeUpdate();
+        C3P0Utils.closeAll(null, psmt, connection);
+        return result;
     }
 
     @Override
@@ -300,7 +312,10 @@ public class StudentAttendaceDaoImpl implements StudentAttendaceDao {
         PreparedStatement psmt = connection.prepareStatement(sb.toString());
         psmt.setInt(1, StudentAttendanceConstant.STUDENT_ATTENDANCE_STATUS_DELETED);
         psmt.setString(2, attendanceId);
-        return psmt.executeUpdate();
+        
+        int result = psmt.executeUpdate();
+        C3P0Utils.closeAll(null, psmt, connection);
+        return result;
     }
 
     @Override
@@ -315,7 +330,9 @@ public class StudentAttendaceDaoImpl implements StudentAttendaceDao {
         sb.append(")");
         PreparedStatement psmt = connection.prepareStatement(sb.toString());
         psmt.setInt(1, StudentAttendanceConstant.STUDENT_ATTENDANCE_STATUS_DELETED);
-        return psmt.executeUpdate();
+        int result = psmt.executeUpdate();
+        C3P0Utils.closeAll(null, psmt, connection);
+        return result;
     }
 
 }
