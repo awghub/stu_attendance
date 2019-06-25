@@ -1,7 +1,6 @@
 $(function() {
 
     // 初始化教师的头像及姓名
-	alert(document.URL);
 	var tid = document.URL.split('?')[1].split("=")[1];
     initTeacherInfo(tid);
     
