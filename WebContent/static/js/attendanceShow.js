@@ -27,7 +27,7 @@ $(function() {
                         //do something
                         $.ajax({
                             type : "post",
-                            url : "teacher/delStudentAttendancesByBatch",
+                            url : "teacherMaster/delStudentAttendancesByBatch",
                             data : {
                                 attendanceIds : ids
                             },
@@ -55,7 +55,7 @@ $(function() {
                 layer.confirm('真的删除行么', function(index) {
                     $.ajax({
                         type : "post",
-                        url : "teacher/delStudentAttendance",
+                        url : "teacherMaster/delStudentAttendance",
                         data : {
                             attendanceId : data.attendanceId
                         },
@@ -94,7 +94,7 @@ $(function() {
     function stuAttInit(table) {
         table.render({
                     elem : '#demo',
-                    url : 'teacher/showStudentsAttendances',
+                    url : 'teacherMaster/showStudentsAttendances',
                     toolbar : '#toolbarDemo',
                     page : true, // 开启分页
                     limits : [ 5, 10, 20, 30, 40, 50 ],

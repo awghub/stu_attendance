@@ -90,7 +90,7 @@ $(function() {
             // return false; //阻止表单跳转
          $.ajax({
               type: "post",
-              url: "teacher/updateStudentAttendance",
+              url: "teacherMaster/updateStudentAttendance",
               data:data.field,
               dataType: "json",
               success: function(result) {
@@ -121,7 +121,7 @@ $(function() {
 function studentAttendanceInit(attendanceId) {
 	$.ajax({
         type:"GET",
-        url:"teacher/showStudentAttendanceByAttendanceId",
+        url:"teacherMaster/showStudentAttendanceByAttendanceId",
         data:{
         	attendanceId: attendanceId
         },
@@ -151,7 +151,7 @@ function studentAttendanceInit(attendanceId) {
 function initStudentAttendanceTypes() {
     $.ajax({
         type:"GET",
-        url:"teacher/findAllStudentAttendanceTypes",
+        url:"teacherMaster/findAllStudentAttendanceTypes",
         data:{},
         dataType:"json",
         async: false,

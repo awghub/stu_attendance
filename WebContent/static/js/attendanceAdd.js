@@ -115,7 +115,7 @@ $(function() {
             // return false; //阻止表单跳转
        $.ajax({
               type: "post",
-              url: "teacher/addStudentAttendance",
+              url: "teacherMaster/addStudentAttendance",
               data:data.field,
               dataType: "json",
               success: function(result) {
@@ -146,7 +146,7 @@ $(function() {
 function initGrades() {
     $.ajax({
         type:"GET",
-        url:"teacher/findAllGrades",
+        url:"teacherMaster/findAllGrades",
         data:{},
         dataType:"json",
         async: false,
@@ -174,7 +174,7 @@ function initGrades() {
 function initStudentAttendanceTypes() {
     $.ajax({
         type:"GET",
-        url:"teacher/findAllStudentAttendanceTypes",
+        url:"teacherMaster/findAllStudentAttendanceTypes",
         data:{},
         dataType:"json",
         async: false,
@@ -201,7 +201,7 @@ function initStudentAttendanceTypes() {
 function findStudentsByGradeName(gradeName) {
     $.ajax({
         type:"GET",
-        url:"teacher/findStudentsByGradeName",
+        url:"teacherMaster/findStudentsByGradeName",
         data:{
             gradeName: gradeName
         },
