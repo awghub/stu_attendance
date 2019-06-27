@@ -24,7 +24,6 @@ $(function() {
                     }
                     // 删除确认提示
                     layer.confirm('是否删除选中的 ' + data.length + " 条记录?", {icon: 3, title:'提示'}, function(index){
-                        //do something
                         $.ajax({
                             type : "post",
                             url : "teacherMaster/delStudentAttendancesByBatch",
@@ -103,14 +102,14 @@ $(function() {
                         // 规定成功的状态码，默认为0，如果不重新规定成功的状态码数据将会无法显示在页面上
                         statusCode : 1006
                     },
-                    parseData : function(res) { // res 即为原始返回的数据
+                    parseData : function(res) {
+                        // res 即为原始返回的数据
                         console.log(res);
                         return {
                             "code" : res.respObj.respObjCode, // 解析接口状态
                             "msg" : res.respObj.respObjMsg, // 解析提示文本
                             "count" : res.data.counts, // 解析数据长度
-                            "data" : res.data.items
-                        // 解析数据列表
+                            "data" : res.data.items // 解析数据列表
                         };
                     },
                     cols : [ [ // 表头
