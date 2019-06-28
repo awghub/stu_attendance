@@ -57,9 +57,10 @@ public interface StudentAttendaceService {
     
     /**
      * 获取学生考勤记录的总记录数
+     * @param studentAttendanceStatus 学生考勤记录的状态码(正常-0,已删除-1),若为null则查询所有
      * @return 学生考勤记录的总记录数
      */
-    int getAllCountOfStudentAttendace() throws SQLException;
+    int getAllCountOfStudentAttendace(Integer studentAttendanceStatus) throws SQLException;
     
     /**
      * 根据指定的考勤流水号来查询考勤记录

@@ -11,6 +11,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+
+import com.awg.jwglxt.student.attendance.constant.StudentAttendanceConstant;
 import com.awg.jwglxt.student.attendance.pojo.Grade;
 import com.awg.jwglxt.student.attendance.pojo.Student;
 import com.awg.jwglxt.student.attendance.pojo.StudentAttendance;
@@ -34,7 +36,8 @@ public class StudentAttendaceController extends HttpServlet{
         req.setCharacterEncoding("utf-8");
         resp.setCharacterEncoding("utf-8");
         PrintWriter out = resp.getWriter();
-        HttpSession session = req.getSession();
+        @SuppressWarnings("unused")
+		HttpSession session = req.getSession();
         //获取请求的全路径
         String url = req.getRequestURI();
         //截取路径
@@ -68,21 +71,22 @@ public class StudentAttendaceController extends HttpServlet{
             }
         }else if ("addStudentAttendance".equals(path)) {
             /** 添加学生考勤记录*/
-        	// 从session中当前登录教师对象，然后再获取其ID
-        	// 但是目前session存放的只有教师的姓名
-        	// Teacher teacher = (Teacher) session.getAttribute("teacher");
-        	// if (teacher == null) {
-        	// 	resp.sendRedirect("login.html");
-        	// 	return;
-        	// }
-        	// Integer teacherId = teacher.getTeacherId();
-        	
-        	// 获取session中存放的教师的姓名
-        	String teacherName = (String) session.getAttribute("teacher");
-        	if (teacherName == null || "".equals(teacherName)) {
-        	 	resp.sendRedirect("login.html");
-        	 	return;
-        	 }
+            // 从session中当前登录教师对象，然后再获取其ID
+            // 但是目前session存放的只有教师的姓名
+            // Teacher teacher = (Teacher) session.getAttribute("teacher");
+            // if (teacher == null) {
+            //     resp.sendRedirect("login.html");
+            //     return;
+            // }
+            // Integer teacherId = teacher.getTeacherId();
+
+            // 获取session中存放的教师的姓名
+//            String teacherName = (String) session.getAttribute("teacher");
+//            if (teacherName == null || "".equals(teacherName)) {
+//                 resp.sendRedirect("login.html");
+//                 return;
+//             }
+            String teacherName = "刘春生";
             // 获取考勤类型
             String attendanceType = req.getParameter("attendance-types");
             // 获取学生ID
@@ -106,14 +110,15 @@ public class StudentAttendaceController extends HttpServlet{
                 out.print(ResultJSONGenerateUtil.object2JSON(ResponseContentType.FLAG_SUCCESS, "1005", "添加学生考勤记录失败", null));
             }
         }else if ("showStudentsAttendances".equals(path)) {
-            /** 查看所有学生的考勤记录*/
+            /** 查看所有学生的考勤记录(未被删除的,即正常的)*/
             Integer pageSize = Integer.valueOf(req.getParameter("limit"));
             Integer currentPage = Integer.valueOf(req.getParameter("page"));
             try {
                 List<StudentAttendance> studentAttendances = sas.findAllStudentAttendances(pageSize, currentPage);
                 Map<String, Object> dataMap = new HashMap<String, Object>();
                 dataMap.put("items", studentAttendances);
-                dataMap.put("counts", sas.getAllCountOfStudentAttendace());
+                // 查询考勤记录状态为未删除的记录总数
+                dataMap.put("counts", sas.getAllCountOfStudentAttendace(StudentAttendanceConstant.STUDENT_ATTENDANCE_STATUS_NORMAL));
                 out.print(ResultJSONGenerateUtil.object2JSON(ResponseContentType.FLAG_SUCCESS, "1006", "查询学生考勤记录成功", dataMap));
             } catch (Exception e) {
                 e.printStackTrace();

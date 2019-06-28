@@ -81,15 +81,26 @@ public class StudentAttendaceDaoImpl implements StudentAttendaceDao {
     }
 
     @Override
-    public int selectAllCountOfStudentAttendace() throws SQLException {
-        int count = 0;
-        String sql = "SELECT COUNT(pk_attendance_id) AS nowCount FROM tb_student_attendance WHERE attendance_staus!=?";
+    public int selectAllCountOfStudentAttendace(Integer studentAttendanceStatus) throws SQLException {
         Connection connection = C3P0Utils.getConn();
         if (connection == null) {
-            return count;
+            return 0;
         }
-        PreparedStatement psmt = connection.prepareStatement(sql);
-        psmt.setInt(1, StudentAttendanceConstant.STUDENT_ATTENDANCE_STATUS_DELETED);
+        int count = 0;
+        StringBuilder sb = new StringBuilder();
+        sb.append("SELECT COUNT(pk_attendance_id) AS nowCount FROM tb_student_attendance WHERE ");
+        PreparedStatement psmt = null;
+        // 根据状态码查询考勤记录总数: 
+        // 若状态码不为空,则查询指定状态码的考勤记录总数;
+        // 若状态码为空,则查询所有的考勤记录总数; 
+        if (studentAttendanceStatus == null) {
+            sb.append(" attendance_staus IS NOT NULL ");
+            psmt = connection.prepareStatement(sb.toString());
+        }else {
+            sb.append(" attendance_staus = ?");
+            psmt = connection.prepareStatement(sb.toString());
+            psmt.setInt(1, studentAttendanceStatus);
+        }
         ResultSet rs = psmt.executeQuery(); 
         if (rs.next()) {
             count = rs.getInt("nowCount");
@@ -102,6 +113,8 @@ public class StudentAttendaceDaoImpl implements StudentAttendaceDao {
     public int insertStudentAttendance(StudentAttendance studentAttendance) throws Exception {
         // 考勤流水号
         String attendanceId = studentAttendance.getAttendanceId();
+        // 教师ID
+        Integer teacherId = selectTeacherIdByTeacherName(studentAttendance.getTeacher().gettName());
         // 学生ID
         String studentId = studentAttendance.getStudent().getStuId();
         // 考勤类型
@@ -114,26 +127,30 @@ public class StudentAttendaceDaoImpl implements StudentAttendaceDao {
         long attendanceActualTimeLength = studentAttendance.getAttendanceActualTimeLength();
         // 考勤描述
         String attendanceDescription = studentAttendance.getAttendanceDescription();
+        // 获取当前时间
+        String currentDate = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
         // 考勤记录状态
         Integer attendanceStatus = studentAttendance.getAttendanceStatus();
         // SQL语句
-        String sql = "INSERT INTO tb_student_attendance(pk_attendance_id,fk_stu_id,fk_student_attendance_type_id,attendance_actual_start_time,attendance_actual_end_time,attendance_actual_time_length,attendance_description,attendance_staus) VALUES(?,?,?,?,?,?,?,?)";
+        String sql = "INSERT INTO tb_student_attendance(pk_attendance_id,fk_teacher_id,fk_stu_id,fk_student_attendance_type_id,attendance_actual_start_time,attendance_actual_end_time,attendance_actual_time_length,attendance_description,attendance_add_date,attendance_staus) VALUES(?,?,?,?,?,?,?,?,?,?)";
         Connection connection = C3P0Utils.getConn();
         PreparedStatement psmt = connection.prepareStatement(sql);
         psmt.setString(1, attendanceId);
-        psmt.setString(2, studentId);
-        psmt.setInt(3, studentAttendanceTypeId);
+        psmt.setInt(2, teacherId);
+        psmt.setString(3, studentId);
+        psmt.setInt(4, studentAttendanceTypeId);
         // 将java.util.Date类型的值转为java.sql.Date类型的值
-        //psmt.setDate(4, new java.sql.Date(actualStartTime.getTime()));
-        //psmt.setDate(5, new java.sql.Date(actualEndTime.getTime()));
+        //psmt.setDate(5, new java.sql.Date(actualStartTime.getTime()));
+        //psmt.setDate(6, new java.sql.Date(actualEndTime.getTime()));
         SimpleDateFormat sdfDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         String actualStartTimeStr = sdfDateFormat.format(actualStartTime);
         String actualEndTimeStr = sdfDateFormat.format(actualEndTime);
-        psmt.setTime(4, Time.valueOf(actualStartTimeStr.substring(actualStartTimeStr.indexOf(" ") + 1)));
-        psmt.setTime(5, Time.valueOf(actualEndTimeStr.substring(actualEndTimeStr.indexOf(" ") + 1)));
-        psmt.setLong(6, attendanceActualTimeLength);
-        psmt.setString(7, attendanceDescription);
-        psmt.setInt(8, attendanceStatus);
+        psmt.setTime(5, Time.valueOf(actualStartTimeStr.substring(actualStartTimeStr.indexOf(" ") + 1)));
+        psmt.setTime(6, Time.valueOf(actualEndTimeStr.substring(actualEndTimeStr.indexOf(" ") + 1)));
+        psmt.setLong(7, attendanceActualTimeLength);
+        psmt.setString(8, attendanceDescription);
+        psmt.setString(9, currentDate);
+        psmt.setInt(10, attendanceStatus);
         int result = psmt.executeUpdate();
         C3P0Utils.closeAll(null, psmt, connection);
         return result;
@@ -331,6 +348,24 @@ public class StudentAttendaceDaoImpl implements StudentAttendaceDao {
         PreparedStatement psmt = connection.prepareStatement(sb.toString());
         psmt.setInt(1, StudentAttendanceConstant.STUDENT_ATTENDANCE_STATUS_DELETED);
         int result = psmt.executeUpdate();
+        C3P0Utils.closeAll(null, psmt, connection);
+        return result;
+    }
+
+    @Override
+    public Integer selectTeacherIdByTeacherName(String teacherName) throws Exception {
+        Connection connection = C3P0Utils.getConn();
+        if (connection == null) {
+            return null;
+        }
+        String sql = "SELECT teacher_id AS tid FROM tb_teacher WHERE teacher_name=? LIMIT 1";
+        PreparedStatement psmt = connection.prepareStatement(sql);
+        psmt.setString(1, teacherName);
+        ResultSet rs = psmt.executeQuery();
+        int result = 0;
+        if (rs.next()) {
+            result = rs.getInt("tid");
+        }
         C3P0Utils.closeAll(null, psmt, connection);
         return result;
     }

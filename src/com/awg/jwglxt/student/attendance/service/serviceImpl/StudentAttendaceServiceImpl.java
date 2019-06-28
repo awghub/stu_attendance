@@ -46,9 +46,9 @@ public class StudentAttendaceServiceImpl implements StudentAttendaceService {
         StudentAttendance defaultStudentAttendance = sad.selectStudentAttendanceOfDefault();
         Date date = new Date();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
-        // 获取考勤序号并加1,作为新的考勤序号
+        // 获取考勤序号(这里获取数据库中所有的考勤记录总数，包括已删除的)并加1,作为新的考勤序号
         StringBuilder sb = new StringBuilder();
-        sb.append(sdf.format(date)).append("_").append(sad.selectAllCountOfStudentAttendace() + 1);
+        sb.append(sdf.format(date)).append("_").append(sad.selectAllCountOfStudentAttendace(null) + 1);
         String attendanceId = sb.toString();
         // 学生的ID
         // 学生考勤类型
@@ -149,9 +149,9 @@ public class StudentAttendaceServiceImpl implements StudentAttendaceService {
     }
 
     @Override
-    public int getAllCountOfStudentAttendace() throws SQLException {
+    public int getAllCountOfStudentAttendace(Integer studentAttendanceStatus) throws SQLException {
         StudentAttendaceDao sad = new StudentAttendaceDaoImpl();
-        return sad.selectAllCountOfStudentAttendace();
+        return sad.selectAllCountOfStudentAttendace(studentAttendanceStatus);
     }
 
     @Override
