@@ -100,7 +100,7 @@ public class StudentAttendaceDaoImpl implements StudentAttendaceDao {
 
     @Override
     public int insertStudentAttendance(StudentAttendance studentAttendance) throws Exception {
-    	// 考勤流水号
+        // 考勤流水号
         String attendanceId = studentAttendance.getAttendanceId();
         // 学生ID
         String studentId = studentAttendance.getStudent().getStuId();

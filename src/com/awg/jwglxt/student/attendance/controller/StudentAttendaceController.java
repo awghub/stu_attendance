@@ -6,12 +6,11 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
+import javax.servlet.http.HttpSession;
 import com.awg.jwglxt.student.attendance.pojo.Grade;
 import com.awg.jwglxt.student.attendance.pojo.Student;
 import com.awg.jwglxt.student.attendance.pojo.StudentAttendance;
@@ -35,6 +34,7 @@ public class StudentAttendaceController extends HttpServlet{
         req.setCharacterEncoding("utf-8");
         resp.setCharacterEncoding("utf-8");
         PrintWriter out = resp.getWriter();
+        HttpSession session = req.getSession();
         //获取请求的全路径
         String url = req.getRequestURI();
         //截取路径
@@ -68,6 +68,21 @@ public class StudentAttendaceController extends HttpServlet{
             }
         }else if ("addStudentAttendance".equals(path)) {
             /** 添加学生考勤记录*/
+        	// 从session中当前登录教师对象，然后再获取其ID
+        	// 但是目前session存放的只有教师的姓名
+        	// Teacher teacher = (Teacher) session.getAttribute("teacher");
+        	// if (teacher == null) {
+        	// 	resp.sendRedirect("login.html");
+        	// 	return;
+        	// }
+        	// Integer teacherId = teacher.getTeacherId();
+        	
+        	// 获取session中存放的教师的姓名
+        	String teacherName = (String) session.getAttribute("teacher");
+        	if (teacherName == null || "".equals(teacherName)) {
+        	 	resp.sendRedirect("login.html");
+        	 	return;
+        	 }
             // 获取考勤类型
             String attendanceType = req.getParameter("attendance-types");
             // 获取学生ID
@@ -80,7 +95,7 @@ public class StudentAttendaceController extends HttpServlet{
             String attendanceDescription = req.getParameter("attendance-description");
             
             try {
-                int result = sas.addStudentAttendance(attendanceType, sutdentId, actualStartTimeStr, actualEndTimeStr, attendanceDescription);
+                int result = sas.addStudentAttendance(teacherName, attendanceType, sutdentId, actualStartTimeStr, actualEndTimeStr, attendanceDescription);
                 if (result == 1) {
                     out.print(ResultJSONGenerateUtil.object2JSON(ResponseContentType.FLAG_SUCCESS, "1004", "添加学生考勤记录成功", result));
                 } else {

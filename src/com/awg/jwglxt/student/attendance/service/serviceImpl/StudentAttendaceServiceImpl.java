@@ -12,6 +12,7 @@ import com.awg.jwglxt.student.attendance.pojo.Grade;
 import com.awg.jwglxt.student.attendance.pojo.Student;
 import com.awg.jwglxt.student.attendance.pojo.StudentAttendance;
 import com.awg.jwglxt.student.attendance.pojo.StudentAttendanceType;
+import com.awg.jwglxt.student.attendance.pojo.Teacher;
 import com.awg.jwglxt.student.attendance.service.StudentAttendaceService;
 /**
  * 学生考勤服务接口实现类
@@ -39,7 +40,7 @@ public class StudentAttendaceServiceImpl implements StudentAttendaceService {
     }
 
     @Override
-    public int addStudentAttendance(String attendanceType, String sutdentId, String actualStartTimeStr, String actualEndTimeStr, String attendanceDescription) throws Exception {
+    public int addStudentAttendance(String teacherName, String attendanceType, String sutdentId, String actualStartTimeStr, String actualEndTimeStr, String attendanceDescription) throws Exception {
         StudentAttendaceDao sad = new StudentAttendaceDaoImpl();
         // 获取包含学生考勤的默认开始时间和默认结束时间的学生考勤对象
         StudentAttendance defaultStudentAttendance = sad.selectStudentAttendanceOfDefault();
@@ -85,7 +86,7 @@ public class StudentAttendaceServiceImpl implements StudentAttendaceService {
         // 获取默认的考勤记录状态
         Integer attendanceStatus = StudentAttendanceConstant.STUDENT_ATTENDANCE_STATUS_NORMAL;
         // 封装学生考勤记录对象 
-        StudentAttendance studentAttendance = new StudentAttendance(attendanceId, new Student(sutdentId), new StudentAttendanceType(Integer.valueOf(attendanceType)), actualStartTimeStr2Date, actualEndTimeStr2Date, attendanceActualTimeLength, attendanceDescription, attendanceStatus);
+        StudentAttendance studentAttendance = new StudentAttendance(attendanceId, new Teacher(teacherName), new Student(sutdentId), new StudentAttendanceType(Integer.valueOf(attendanceType)), actualStartTimeStr2Date, actualEndTimeStr2Date, attendanceActualTimeLength, attendanceDescription, attendanceStatus);
         return sad.insertStudentAttendance(studentAttendance);
     }
 
@@ -201,7 +202,7 @@ public class StudentAttendaceServiceImpl implements StudentAttendaceService {
         // 获取默认的考勤记录状态
         Integer attendanceStatus = StudentAttendanceConstant.STUDENT_ATTENDANCE_STATUS_NORMAL;
         // 封装学生考勤记录对象 
-        StudentAttendance studentAttendance = new StudentAttendance(attendanceId, new Student(sutdentId), new StudentAttendanceType(Integer.valueOf(attendanceType)), actualStartTimeStr2Date, actualEndTimeStr2Date, attendanceActualTimeLength, attendanceDescription, attendanceStatus);
+        StudentAttendance studentAttendance = new StudentAttendance(attendanceId, null, new Student(sutdentId), new StudentAttendanceType(Integer.valueOf(attendanceType)), actualStartTimeStr2Date, actualEndTimeStr2Date, attendanceActualTimeLength, attendanceDescription, attendanceStatus);
         return sad.updateStudentAttendance(studentAttendance);
     }
 

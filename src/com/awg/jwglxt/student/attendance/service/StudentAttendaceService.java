@@ -45,7 +45,7 @@ public interface StudentAttendaceService {
      * @return 受影响的行数
      * @throws Exception 异常
      */
-    int addStudentAttendance(String attendanceType, String sutdentId, String actualStartTimeStr, String actualEndTimeStr, String attendanceDescription) throws Exception;
+    int addStudentAttendance(String teacherName, String attendanceType, String sutdentId, String actualStartTimeStr, String actualEndTimeStr, String attendanceDescription) throws Exception;
     
     /**
      * 分页查看所有学生的考勤记录

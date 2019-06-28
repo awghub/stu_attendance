@@ -10,34 +10,40 @@ import java.util.Date;
 public class StudentAttendance implements Serializable {
 
     private static final long serialVersionUID = 1L;
-    
+
     // 学生考勤的ID
     private String attendanceId;
-    
+
+    // 教师实体
+    private Teacher teacher;
+
     // 学生实体
     private Student student;
-    
+
     // 学生考勤类型实体
     private StudentAttendanceType studentAttendanceType;
-    
+
     // 学生考勤的默认开始时间
     private Date attendanceDefaultStartTime;
-    
+
     // 学生考勤的默认结束时间
     private Date attendanceDefaultEndTime;
-    
+
     // 学生考勤的实际开始时间
     private Date attendanceActualStartTime;
-    
+
     // 学生考勤的实际结束时间
     private Date attendanceActualEndTime;
-    
+
     // 考勤类型对应的时长
     private long attendanceActualTimeLength;
-    
+
     // 考勤类型描述或说明
     private String attendanceDescription;
-    
+
+    // 考勤记录添加日期
+    private Date attendanceAddDate;
+
     // 考勤记录的状态
     private Integer attendanceStatus;
 
@@ -51,11 +57,12 @@ public class StudentAttendance implements Serializable {
         this.attendanceDefaultEndTime = attendanceDefaultEndTime;
     }
 
-    public StudentAttendance(String attendanceId, Student student, StudentAttendanceType studentAttendanceType,
+    public StudentAttendance(String attendanceId, Teacher teacher, Student student, StudentAttendanceType studentAttendanceType,
             Date attendanceActualStartTime, Date attendanceActualEndTime, long attendanceActualTimeLength, String attendanceDescription,
             Integer attendanceStatus) {
         super();
         this.attendanceId = attendanceId;
+        this.teacher = teacher;
         this.student = student;
         this.studentAttendanceType = studentAttendanceType;
         this.attendanceActualStartTime = attendanceActualStartTime;
@@ -86,6 +93,14 @@ public class StudentAttendance implements Serializable {
 
     public void setAttendanceId(String attendanceId) {
         this.attendanceId = attendanceId;
+    }
+
+    public Teacher getTeacher() {
+        return teacher;
+    }
+
+    public void setTeacher(Teacher teacher) {
+        this.teacher = teacher;
     }
 
     public Student getStudent() {
@@ -156,6 +171,14 @@ public class StudentAttendance implements Serializable {
         return attendanceStatus;
     }
 
+    public Date getAttendanceAddDate() {
+        return attendanceAddDate;
+    }
+
+    public void setAttendanceAddDate(Date attendanceAddDate) {
+        this.attendanceAddDate = attendanceAddDate;
+    }
+
     public void setAttendanceStatus(Integer attendanceStatus) {
         this.attendanceStatus = attendanceStatus;
     }
@@ -166,12 +189,13 @@ public class StudentAttendance implements Serializable {
 
     @Override
     public String toString() {
-        return "StudentAttendance [attendanceId=" + attendanceId + ", student=" + student + ", studentAttendanceType="
-                + studentAttendanceType + ", attendanceDefaultStartTime=" + attendanceDefaultStartTime
-                + ", attendanceDefaultEndTime=" + attendanceDefaultEndTime + ", attendanceActualStartTime="
-                + attendanceActualStartTime + ", attendanceActualEndTime=" + attendanceActualEndTime
-                + ", attendanceActualTimeLength=" + attendanceActualTimeLength + ", attendanceDescription="
-                + attendanceDescription + ", attendanceStatus=" + attendanceStatus + "]";
+        return "StudentAttendance [attendanceId=" + attendanceId + ", teacher=" + teacher + ", student=" + student
+                + ", studentAttendanceType=" + studentAttendanceType + ", attendanceDefaultStartTime="
+                + attendanceDefaultStartTime + ", attendanceDefaultEndTime=" + attendanceDefaultEndTime
+                + ", attendanceActualStartTime=" + attendanceActualStartTime + ", attendanceActualEndTime="
+                + attendanceActualEndTime + ", attendanceActualTimeLength=" + attendanceActualTimeLength
+                + ", attendanceDescription=" + attendanceDescription + ", attendanceAddDate=" + attendanceAddDate
+                + ", attendanceStatus=" + attendanceStatus + "]";
     }
 
 }
