@@ -57,9 +57,16 @@ public class StudentAttendance implements Serializable {
         this.attendanceDefaultEndTime = attendanceDefaultEndTime;
     }
 
+    public StudentAttendance(String attendanceId, Teacher teacher, Student student) {
+        super();
+        this.attendanceId = attendanceId;
+        this.teacher = teacher;
+        this.student = student;
+    }
+
     public StudentAttendance(String attendanceId, Teacher teacher, Student student, StudentAttendanceType studentAttendanceType,
             Date attendanceActualStartTime, Date attendanceActualEndTime, long attendanceActualTimeLength, String attendanceDescription,
-            Integer attendanceStatus) {
+            Date attendanceAddDate, Integer attendanceStatus) {
         super();
         this.attendanceId = attendanceId;
         this.teacher = teacher;
@@ -69,14 +76,17 @@ public class StudentAttendance implements Serializable {
         this.attendanceActualEndTime = attendanceActualEndTime;
         this.attendanceActualTimeLength = attendanceActualTimeLength;
         this.attendanceDescription = attendanceDescription;
+        this.attendanceAddDate = attendanceAddDate;
         this.attendanceStatus = attendanceStatus;
     }
 
-    public StudentAttendance(String attendanceId, Student student, StudentAttendanceType studentAttendanceType,
-            Date attendanceDefaultStartTime, Date attendanceDefaultEndTime, Date attendanceActualStartTime,
-            Date attendanceActualEndTime, long attendanceActualTimeLength, String attendanceDescription) {
+    public StudentAttendance(String attendanceId, Teacher teacher, Student student,
+            StudentAttendanceType studentAttendanceType, Date attendanceDefaultStartTime, Date attendanceDefaultEndTime,
+            Date attendanceActualStartTime, Date attendanceActualEndTime, long attendanceActualTimeLength,
+            String attendanceDescription, Date attendanceAddDate, Integer attendanceStatus) {
         super();
         this.attendanceId = attendanceId;
+        this.teacher = teacher;
         this.student = student;
         this.studentAttendanceType = studentAttendanceType;
         this.attendanceDefaultStartTime = attendanceDefaultStartTime;
@@ -85,6 +95,8 @@ public class StudentAttendance implements Serializable {
         this.attendanceActualEndTime = attendanceActualEndTime;
         this.attendanceActualTimeLength = attendanceActualTimeLength;
         this.attendanceDescription = attendanceDescription;
+        this.attendanceAddDate = attendanceAddDate;
+        this.attendanceStatus = attendanceStatus;
     }
 
     public String getAttendanceId() {

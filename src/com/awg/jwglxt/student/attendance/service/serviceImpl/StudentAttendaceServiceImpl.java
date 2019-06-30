@@ -1,10 +1,8 @@
 package com.awg.jwglxt.student.attendance.service.serviceImpl;
 
-import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
-
 import com.awg.jwglxt.student.attendance.constant.StudentAttendanceConstant;
 import com.awg.jwglxt.student.attendance.dao.StudentAttendaceDao;
 import com.awg.jwglxt.student.attendance.dao.daoImpl.StudentAttendaceDaoImpl;
@@ -14,6 +12,7 @@ import com.awg.jwglxt.student.attendance.pojo.StudentAttendance;
 import com.awg.jwglxt.student.attendance.pojo.StudentAttendanceType;
 import com.awg.jwglxt.student.attendance.pojo.Teacher;
 import com.awg.jwglxt.student.attendance.service.StudentAttendaceService;
+
 /**
  * 学生考勤服务接口实现类
  * @author AWG
@@ -48,7 +47,7 @@ public class StudentAttendaceServiceImpl implements StudentAttendaceService {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
         // 获取考勤序号(这里获取数据库中所有的考勤记录总数，包括已删除的)并加1,作为新的考勤序号
         StringBuilder sb = new StringBuilder();
-        sb.append(sdf.format(date)).append("_").append(sad.selectAllCountOfStudentAttendace(null) + 1);
+        sb.append(sdf.format(date)).append("_").append(sad.selectAllCountOfStudentAttendace(null, null) + 1);
         String attendanceId = sb.toString();
         // 学生的ID
         // 学生考勤类型
@@ -86,7 +85,7 @@ public class StudentAttendaceServiceImpl implements StudentAttendaceService {
         // 获取默认的考勤记录状态
         Integer attendanceStatus = StudentAttendanceConstant.STUDENT_ATTENDANCE_STATUS_NORMAL;
         // 封装学生考勤记录对象 
-        StudentAttendance studentAttendance = new StudentAttendance(attendanceId, new Teacher(teacherName), new Student(sutdentId), new StudentAttendanceType(Integer.valueOf(attendanceType)), actualStartTimeStr2Date, actualEndTimeStr2Date, attendanceActualTimeLength, attendanceDescription, attendanceStatus);
+        StudentAttendance studentAttendance = new StudentAttendance(attendanceId, new Teacher(teacherName), new Student(sutdentId), new StudentAttendanceType(Integer.valueOf(attendanceType)), actualStartTimeStr2Date, actualEndTimeStr2Date, attendanceActualTimeLength, attendanceDescription, new Date(), attendanceStatus);
         return sad.insertStudentAttendance(studentAttendance);
     }
 
@@ -137,21 +136,23 @@ public class StudentAttendaceServiceImpl implements StudentAttendaceService {
    }
 
     @Override
-    public List<StudentAttendance> findAllStudentAttendances(Integer pageSize, Integer currentPage) throws Exception {
-        StudentAttendaceDao sad = new StudentAttendaceDaoImpl();
+    public List<StudentAttendance> findAllStudentAttendances(String teacherName, Integer pageSize, Integer currentPage) throws Exception {
         if (!String.valueOf(pageSize).matches(StudentAttendanceConstant.PAGE_REGX)) {
             pageSize = StudentAttendanceConstant.PAGE_SIZE;
         }
         if (!String.valueOf(currentPage).matches(StudentAttendanceConstant.PAGE_REGX)) {
             currentPage = StudentAttendanceConstant.DAFAULT_PAGE;
         }
-        return sad.selectStudentAttendances(pageSize, currentPage);
+        StudentAttendaceDao sad = new StudentAttendaceDaoImpl();
+        Integer teacherId = sad.selectTeacherIdByTeacherName(teacherName);
+        return sad.selectStudentAttendances(teacherId, pageSize, currentPage);
     }
 
     @Override
-    public int getAllCountOfStudentAttendace(Integer studentAttendanceStatus) throws SQLException {
+    public int getAllCountOfStudentAttendace(String teacherName, Integer studentAttendanceStatus) throws Exception {
         StudentAttendaceDao sad = new StudentAttendaceDaoImpl();
-        return sad.selectAllCountOfStudentAttendace(studentAttendanceStatus);
+        Integer teacherId = sad.selectTeacherIdByTeacherName(teacherName);
+        return sad.selectAllCountOfStudentAttendace(teacherId, studentAttendanceStatus);
     }
 
     @Override
@@ -202,7 +203,7 @@ public class StudentAttendaceServiceImpl implements StudentAttendaceService {
         // 获取默认的考勤记录状态
         Integer attendanceStatus = StudentAttendanceConstant.STUDENT_ATTENDANCE_STATUS_NORMAL;
         // 封装学生考勤记录对象 
-        StudentAttendance studentAttendance = new StudentAttendance(attendanceId, null, new Student(sutdentId), new StudentAttendanceType(Integer.valueOf(attendanceType)), actualStartTimeStr2Date, actualEndTimeStr2Date, attendanceActualTimeLength, attendanceDescription, attendanceStatus);
+        StudentAttendance studentAttendance = new StudentAttendance(attendanceId, null, new Student(sutdentId), new StudentAttendanceType(Integer.valueOf(attendanceType)), actualStartTimeStr2Date, actualEndTimeStr2Date, attendanceActualTimeLength, attendanceDescription, new Date(), attendanceStatus);
         return sad.updateStudentAttendance(studentAttendance);
     }
 
@@ -221,5 +222,24 @@ public class StudentAttendaceServiceImpl implements StudentAttendaceService {
 		}
 		return new StudentAttendaceDaoImpl().delStudentAttendanceByBatch(attendanceIds);
 	}
+
+    @Override
+    public List<StudentAttendance> findAllStudentAttendancesByTeacherId(Integer teacherId) throws Exception {
+        StudentAttendaceDao sad = new StudentAttendaceDaoImpl();
+        return sad.selectAllStudentAttendancesByTeacherId(teacherId);
+    }
+
+    @Override
+    public List<StudentAttendance> findAllStudentAttendanceByConditions(Integer teacherId, String stuId, String dateMin,
+            String dateMax, Integer pageSize, Integer currentPage) throws Exception {
+        if (!String.valueOf(pageSize).matches(StudentAttendanceConstant.PAGE_REGX)) {
+            pageSize = StudentAttendanceConstant.PAGE_SIZE;
+        }
+        if (!String.valueOf(currentPage).matches(StudentAttendanceConstant.PAGE_REGX)) {
+            currentPage = StudentAttendanceConstant.DAFAULT_PAGE;
+        }
+        StudentAttendaceDao sad = new StudentAttendaceDaoImpl();
+        return sad.selectAllStudentAttendanceByConditions(teacherId, stuId, dateMin, dateMax, pageSize, currentPage);
+    }
     
 }

@@ -3,7 +3,7 @@ $(function() {
     // 初始化教师的头像及姓名
     //var tid = document.URL.split('?')[1].split("=")[1];
     //initTeacherInfo(tid);
-    initTeacherInfo();
+    //initTeacherInfo();
     
     // 初始化加载导航依赖(element)模块
     layui.use('element', function() {
