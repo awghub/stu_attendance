@@ -7,12 +7,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import com.awg.jwglxt.student.attendance.constant.StudentAttendanceConstant;
+import com.awg.jwglxt.student.attendance.dao.StudentAttendaceDao;
+import com.awg.jwglxt.student.attendance.dao.daoImpl.StudentAttendaceDaoImpl;
 import com.awg.jwglxt.student.attendance.pojo.Grade;
 import com.awg.jwglxt.student.attendance.pojo.Student;
 import com.awg.jwglxt.student.attendance.pojo.StudentAttendance;
@@ -43,6 +46,36 @@ public class StudentAttendaceController extends HttpServlet{
         //截取路径
         String path = url.substring(url.lastIndexOf("/")+1);
         StudentAttendaceService  sas = new StudentAttendaceServiceImpl();
+        // 从session中当前登录教师对象，然后再获取其ID
+        // 但是目前session存放的只有教师的姓名
+        // Teacher teacher = (Teacher) session.getAttribute("teacher");
+        // if (teacher == null) {
+        //     resp.sendRedirect("login.html");
+        //     return;
+        // }
+        // Integer teacherId = teacher.getTeacherId();
+
+        // 获取session中存放的教师的姓名
+//        String teacherName = (String) session.getAttribute("teacher");
+//        if (teacherName == null || "".equals(teacherName)) {
+//             resp.sendRedirect("login.html");
+//             return;
+//         }
+        String teacherName = "刘春生";
+
+        //--------------------------------------------
+        StudentAttendaceDao sad = new StudentAttendaceDaoImpl();
+        Integer teacherId = null;
+        try {
+            teacherId = sad.selectTeacherIdByTeacherName(teacherName);
+        } catch (Exception e1) {
+            e1.printStackTrace();
+        }
+        Cookie cookie = new Cookie("teacherId", String.valueOf(teacherId));
+        cookie.setMaxAge(7*24*60*60);
+        cookie.setPath(req.getContextPath() + "/");
+        resp.addCookie(cookie);
+        //--------------------------------------------
         
         if ("findAllGrades".equals(path)) {
             /** 查询所有班级*/
@@ -71,22 +104,6 @@ public class StudentAttendaceController extends HttpServlet{
             }
         }else if ("addStudentAttendance".equals(path)) {
             /** 添加学生考勤记录*/
-            // 从session中当前登录教师对象，然后再获取其ID
-            // 但是目前session存放的只有教师的姓名
-            // Teacher teacher = (Teacher) session.getAttribute("teacher");
-            // if (teacher == null) {
-            //     resp.sendRedirect("login.html");
-            //     return;
-            // }
-            // Integer teacherId = teacher.getTeacherId();
-
-            // 获取session中存放的教师的姓名
-//            String teacherName = (String) session.getAttribute("teacher");
-//            if (teacherName == null || "".equals(teacherName)) {
-//                 resp.sendRedirect("login.html");
-//                 return;
-//             }
-            String teacherName = "刘春生";
             // 获取考勤类型
             String attendanceType = req.getParameter("attendance-types");
             // 获取学生ID
@@ -114,11 +131,11 @@ public class StudentAttendaceController extends HttpServlet{
             Integer pageSize = Integer.valueOf(req.getParameter("limit"));
             Integer currentPage = Integer.valueOf(req.getParameter("page"));
             try {
-                List<StudentAttendance> studentAttendances = sas.findAllStudentAttendances(pageSize, currentPage);
+                List<StudentAttendance> studentAttendances = sas.findAllStudentAttendances(teacherName, pageSize, currentPage);
                 Map<String, Object> dataMap = new HashMap<String, Object>();
                 dataMap.put("items", studentAttendances);
                 // 查询考勤记录状态为未删除的记录总数
-                dataMap.put("counts", sas.getAllCountOfStudentAttendace(StudentAttendanceConstant.STUDENT_ATTENDANCE_STATUS_NORMAL));
+                dataMap.put("counts", sas.getAllCountOfStudentAttendace(teacherName, StudentAttendanceConstant.STUDENT_ATTENDANCE_STATUS_NORMAL));
                 out.print(ResultJSONGenerateUtil.object2JSON(ResponseContentType.FLAG_SUCCESS, "1006", "查询学生考勤记录成功", dataMap));
             } catch (Exception e) {
                 e.printStackTrace();
@@ -193,6 +210,43 @@ public class StudentAttendaceController extends HttpServlet{
             } catch (Exception e) {
                 e.printStackTrace();
                 out.print(ResultJSONGenerateUtil.object2JSON(ResponseContentType.FLAG_SUCCESS, "1013", "删除学生考勤记录失败", null));
+            }
+        }else if ("findStudentsByTeacherId".equals(path)) {
+            /** 根据教师ID查询该教师所有的考勤记录*/
+            // 获取教师ID
+            //Integer teacherId = Integer.valueOf(req.getParameter("teacherId"));
+            try {
+                List<StudentAttendance> studentAttendances = sas.findAllStudentAttendancesByTeacherId(teacherId);
+                out.print(ResultJSONGenerateUtil.object2JSON(ResponseContentType.FLAG_SUCCESS, "1006", "查询学生考勤记录成功", studentAttendances));
+            } catch (Exception e) {
+                e.printStackTrace();
+                out.print(ResultJSONGenerateUtil.object2JSON(ResponseContentType.FLAG_SUCCESS, "1007", "查询学生考勤记录失败", null));
+            }
+        }else if ("findStudentsByConditions".equals(path)) {
+            /** 根据自定义条件查询学生考勤记录*/
+            // 1.教师ID
+            // 2.学生ID
+            String stuId = req.getParameter("stuId");
+            // 3.起始日期
+            String dateMin = req.getParameter("date_min");
+            // 4.结束日期
+            String dateMax = req.getParameter("date_max");
+            // 分页时的每一页的数据量
+            Integer pageSize = Integer.valueOf(req.getParameter("limit"));
+            // 分页时要查询的页码
+            Integer currentPage = Integer.valueOf(req.getParameter("page"));
+            
+            System.out.println("teacherId = " + teacherId + ", stuId = " + stuId + ", dateMin = " + dateMin + ", dateMax = " + dateMax);
+            try {
+                List<StudentAttendance> studentAttendances = sas.findAllStudentAttendanceByConditions(teacherId, stuId, dateMin, dateMax, pageSize, currentPage);
+                Map<String, Object> dataMap = new HashMap<String, Object>();
+                dataMap.put("items", studentAttendances);
+                // 查询考勤记录状态为未删除的记录总数
+                dataMap.put("counts", sas.getAllCountOfStudentAttendace(teacherName, StudentAttendanceConstant.STUDENT_ATTENDANCE_STATUS_NORMAL));
+                out.print(ResultJSONGenerateUtil.object2JSON(ResponseContentType.FLAG_SUCCESS, "1006", "查询学生考勤记录成功", dataMap));
+            } catch (Exception e) {
+                e.printStackTrace();
+                out.print(ResultJSONGenerateUtil.object2JSON(ResponseContentType.FLAG_SUCCESS, "1007", "查询学生考勤记录失败", null));
             }
         }
     }

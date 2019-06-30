@@ -17,6 +17,7 @@ import com.awg.jwglxt.student.attendance.pojo.Grade;
 import com.awg.jwglxt.student.attendance.pojo.Student;
 import com.awg.jwglxt.student.attendance.pojo.StudentAttendance;
 import com.awg.jwglxt.student.attendance.pojo.StudentAttendanceType;
+import com.awg.jwglxt.student.attendance.pojo.Teacher;
 import com.awg.jwglxt.student.attendance.util.C3P0Utils;
 /**
  * 学生数据访问接口实现类
@@ -81,27 +82,37 @@ public class StudentAttendaceDaoImpl implements StudentAttendaceDao {
     }
 
     @Override
-    public int selectAllCountOfStudentAttendace(Integer studentAttendanceStatus) throws SQLException {
+    public int selectAllCountOfStudentAttendace(Integer teacherId, Integer studentAttendanceStatus) throws SQLException {
         Connection connection = C3P0Utils.getConn();
         if (connection == null) {
             return 0;
         }
-        int count = 0;
+
         StringBuilder sb = new StringBuilder();
-        sb.append("SELECT COUNT(pk_attendance_id) AS nowCount FROM tb_student_attendance WHERE ");
         PreparedStatement psmt = null;
-        // 根据状态码查询考勤记录总数: 
-        // 若状态码不为空,则查询指定状态码的考勤记录总数;
-        // 若状态码为空,则查询所有的考勤记录总数; 
-        if (studentAttendanceStatus == null) {
-            sb.append(" attendance_staus IS NOT NULL ");
+        // 1.若教师ID为空且状态码为空，则查询总的所有考勤记录总数
+        if (teacherId == null && studentAttendanceStatus == null) {
+            sb.append("SELECT COUNT(pk_attendance_id) AS nowCount FROM tb_student_attendance ");
             psmt = connection.prepareStatement(sb.toString());
-        }else {
-            sb.append(" attendance_staus = ?");
-            psmt = connection.prepareStatement(sb.toString());
-            psmt.setInt(1, studentAttendanceStatus);
+        }else if (teacherId != null) {
+            // 2.若教师ID为空且状态码不为空，则根据状态码查询考勤记录总数
+            //      2.1若状态码为空,则查询该教师下所有的考勤记录总数; 
+            //      2.2若状态码不为空,则查询该教师下指定状态码的考勤记录总数;
+            sb.append("SELECT COUNT(pk_attendance_id) AS nowCount FROM tb_student_attendance WHERE fk_teacher_id=? AND ");
+            if (studentAttendanceStatus == null) {
+                sb.append(" attendance_staus IS NOT NULL ");
+                psmt = connection.prepareStatement(sb.toString());
+                psmt.setInt(1, teacherId);
+            }else {
+                sb.append(" attendance_staus=?");
+                psmt = connection.prepareStatement(sb.toString());
+                psmt.setInt(1, teacherId);
+                psmt.setInt(2, studentAttendanceStatus);
+            }
         }
-        ResultSet rs = psmt.executeQuery(); 
+        
+        ResultSet rs = psmt.executeQuery();
+        int count = 0;
         if (rs.next()) {
             count = rs.getInt("nowCount");
         }
@@ -128,7 +139,7 @@ public class StudentAttendaceDaoImpl implements StudentAttendaceDao {
         // 考勤描述
         String attendanceDescription = studentAttendance.getAttendanceDescription();
         // 获取当前时间
-        String currentDate = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
+        String currentDate = new SimpleDateFormat("yyyy-MM-dd").format(studentAttendance.getAttendanceAddDate());
         // 考勤记录状态
         Integer attendanceStatus = studentAttendance.getAttendanceStatus();
         // SQL语句
@@ -177,7 +188,7 @@ public class StudentAttendaceDaoImpl implements StudentAttendaceDao {
     }
 
     @Override
-    public List<StudentAttendance> selectStudentAttendances(Integer pageSize, Integer currentPage) throws Exception{
+    public List<StudentAttendance> selectStudentAttendances(Integer teacherId, Integer pageSize, Integer currentPage) throws Exception{
         Connection connection = C3P0Utils.getConn();
         if (connection == null) {
             return null;
@@ -188,6 +199,7 @@ public class StudentAttendaceDaoImpl implements StudentAttendaceDao {
         sb.append(" stu.stu_id, ");
         sb.append(" stu.stu_name, ");
         sb.append(" sa.pk_attendance_id, ");
+        sb.append(" sa.fk_teacher_id, ");
         sb.append(" sa.fk_student_attendance_type_id, ");
         sb.append(" sa.attendance_default_start_time, ");
         sb.append(" sa.attendance_default_end_time, ");
@@ -195,6 +207,7 @@ public class StudentAttendaceDaoImpl implements StudentAttendaceDao {
         sb.append(" sa.attendance_actual_end_time, ");
         sb.append(" sa.attendance_actual_time_length, ");
         sb.append(" sa.attendance_description, ");
+        sb.append(" sa.attendance_add_date, ");
         sb.append(" sat.pk_student_attendance_type_id, ");
         sb.append(" sat.student_attendance_type_name ");
         sb.append(" FROM ");
@@ -206,11 +219,12 @@ public class StudentAttendaceDaoImpl implements StudentAttendaceDao {
         sb.append(" ON ");
         sb.append(" sa.fk_student_attendance_type_id=sat.pk_student_attendance_type_id ");
         sb.append(") ON ");
-        sb.append(" sa.fk_stu_id=stu.stu_id WHERE sa.attendance_staus!=? LIMIT ?,?");
+        sb.append(" sa.fk_stu_id=stu.stu_id WHERE sa.fk_teacher_id=? AND sa.attendance_staus!=? LIMIT ?,?");
         PreparedStatement psmt = connection.prepareStatement(sb.toString());
-        psmt.setInt(1, StudentAttendanceConstant.STUDENT_ATTENDANCE_STATUS_DELETED);
-        psmt.setInt(2, (currentPage - 1)*pageSize);
-        psmt.setInt(3, pageSize);
+        psmt.setInt(1, teacherId);
+        psmt.setInt(2, StudentAttendanceConstant.STUDENT_ATTENDANCE_STATUS_DELETED);
+        psmt.setInt(3, (currentPage - 1)*pageSize);
+        psmt.setInt(4, pageSize);
         ResultSet rs = psmt.executeQuery();
         
         List<StudentAttendance> studentAttendances = new ArrayList<StudentAttendance>();
@@ -221,7 +235,50 @@ public class StudentAttendaceDaoImpl implements StudentAttendaceDao {
         while (rs.next()) {
             student = new Student(rs.getString("stu_id"), rs.getString("stu_name"));
             studentAttendanceType = new StudentAttendanceType(rs.getInt("pk_student_attendance_type_id"), rs.getString("student_attendance_type_name"));
-            studentAttendance = new StudentAttendance(rs.getString("pk_attendance_id"), student, studentAttendanceType, rs.getTime("attendance_default_start_time"), rs.getTime("attendance_default_end_time"), rs.getTime("attendance_actual_start_time"), rs.getTime("attendance_actual_end_time"), rs.getLong("attendance_actual_time_length"), rs.getString("attendance_description"));
+            studentAttendance = new StudentAttendance(rs.getString("pk_attendance_id"), new Teacher(teacherId), student, studentAttendanceType, rs.getTime("attendance_default_start_time"), rs.getTime("attendance_default_end_time"), rs.getTime("attendance_actual_start_time"), rs.getTime("attendance_actual_end_time"), rs.getLong("attendance_actual_time_length"), rs.getString("attendance_description"), rs.getDate("attendance_add_date"), StudentAttendanceConstant.STUDENT_ATTENDANCE_STATUS_NORMAL);
+            studentAttendances.add(studentAttendance);
+        }
+        C3P0Utils.closeAll(rs, psmt, connection);
+        return studentAttendances;
+    }
+    
+    
+
+    @Override
+    public List<StudentAttendance> selectAllStudentAttendancesByTeacherId(Integer teacherId) throws Exception {
+        Connection connection = C3P0Utils.getConn();
+        if (connection == null) {
+            return null;
+        }
+        
+        StringBuilder sb = new StringBuilder();
+        sb.append("SELECT ");
+        sb.append(" stu.stu_id, ");
+        sb.append(" stu.stu_name, ");
+        sb.append(" sa.pk_attendance_id, ");
+        sb.append(" sa.fk_teacher_id ");
+        sb.append(" FROM ");
+        sb.append(" tb_student AS stu ");
+        sb.append(" LEFT JOIN( ");
+        sb.append(" tb_student_attendance AS sa ");
+        sb.append(" LEFT JOIN ");
+        sb.append(" tb_student_attendance_type AS sat ");
+        sb.append(" ON ");
+        sb.append(" sa.fk_student_attendance_type_id=sat.pk_student_attendance_type_id ");
+        sb.append(") ON ");
+        sb.append(" sa.fk_stu_id=stu.stu_id WHERE sa.fk_teacher_id=? AND sa.attendance_staus!=?");
+        PreparedStatement psmt = connection.prepareStatement(sb.toString());
+        psmt.setInt(1, teacherId);
+        psmt.setInt(2, StudentAttendanceConstant.STUDENT_ATTENDANCE_STATUS_DELETED);
+        ResultSet rs = psmt.executeQuery();
+        
+        List<StudentAttendance> studentAttendances = new ArrayList<StudentAttendance>();
+        StudentAttendance studentAttendance = null;
+        Student student = null;
+        
+        while (rs.next()) {
+            student = new Student(rs.getString("stu_id"), rs.getString("stu_name"));
+            studentAttendance = new StudentAttendance(rs.getString("pk_attendance_id"), new Teacher(teacherId), student);
             studentAttendances.add(studentAttendance);
         }
         C3P0Utils.closeAll(rs, psmt, connection);
@@ -241,6 +298,7 @@ public class StudentAttendaceDaoImpl implements StudentAttendaceDao {
         sb.append(" stu.stu_name, ");
         sb.append(" stu.grade_name, ");
         sb.append(" sa.pk_attendance_id, ");
+        sb.append(" sa.fk_teacher_id, ");
         sb.append(" sa.fk_student_attendance_type_id, ");
         sb.append(" sa.attendance_default_start_time, ");
         sb.append(" sa.attendance_default_end_time, ");
@@ -248,6 +306,7 @@ public class StudentAttendaceDaoImpl implements StudentAttendaceDao {
         sb.append(" sa.attendance_actual_end_time, ");
         sb.append(" sa.attendance_actual_time_length, ");
         sb.append(" sa.attendance_description, ");
+        sb.append(" sa.attendance_add_date, ");
         sb.append(" sat.pk_student_attendance_type_id, ");
         sb.append(" sat.student_attendance_type_name ");
         sb.append(" FROM ");
@@ -269,7 +328,7 @@ public class StudentAttendaceDaoImpl implements StudentAttendaceDao {
         if (rs.next()) {
             student = new Student(rs.getString("stu_id"), rs.getString("stu_name"), rs.getString("grade_name"));
             studentAttendanceType = new StudentAttendanceType(rs.getInt("pk_student_attendance_type_id"), rs.getString("student_attendance_type_name"));
-            studentAttendance = new StudentAttendance(rs.getString("pk_attendance_id"), student, studentAttendanceType, rs.getTime("attendance_default_start_time"), rs.getTime("attendance_default_end_time"), rs.getTime("attendance_actual_start_time"), rs.getTime("attendance_actual_end_time"), rs.getLong("attendance_actual_time_length"), rs.getString("attendance_description"));
+            studentAttendance = new StudentAttendance(rs.getString("pk_attendance_id"), new Teacher(rs.getInt("fk_teacher_id")), student, studentAttendanceType, rs.getTime("attendance_default_start_time"), rs.getTime("attendance_default_end_time"), rs.getTime("attendance_actual_start_time"), rs.getTime("attendance_actual_end_time"), rs.getLong("attendance_actual_time_length"), rs.getString("attendance_description"), rs.getDate("attendance_add_date"), StudentAttendanceConstant.STUDENT_ATTENDANCE_STATUS_NORMAL);
         }
         C3P0Utils.closeAll(rs, psmt, connection);
         return studentAttendance;
@@ -368,6 +427,90 @@ public class StudentAttendaceDaoImpl implements StudentAttendaceDao {
         }
         C3P0Utils.closeAll(null, psmt, connection);
         return result;
+    }
+
+    @Override
+    public List<StudentAttendance> selectAllStudentAttendanceByConditions(Integer teacherId, String stuId,
+            String dateMin, String dateMax, Integer pageSize, Integer currentPage) throws Exception {
+        Connection connection = C3P0Utils.getConn();
+        if (connection == null) {
+            return null;
+        }
+        PreparedStatement psmt = null;
+        StringBuilder sb = new StringBuilder();
+        sb.append("SELECT ");
+        sb.append(" stu.stu_id, ");
+        sb.append(" stu.stu_name, ");
+        sb.append(" sa.pk_attendance_id, ");
+        sb.append(" sa.fk_teacher_id, ");
+        sb.append(" sa.fk_student_attendance_type_id, ");
+        sb.append(" sa.attendance_default_start_time, ");
+        sb.append(" sa.attendance_default_end_time, ");
+        sb.append(" sa.attendance_actual_start_time, ");
+        sb.append(" sa.attendance_actual_end_time, ");
+        sb.append(" sa.attendance_actual_time_length, ");
+        sb.append(" sa.attendance_description, ");
+        sb.append(" sa.attendance_add_date, ");
+        sb.append(" sat.pk_student_attendance_type_id, ");
+        sb.append(" sat.student_attendance_type_name ");
+        sb.append(" FROM ");
+        sb.append(" tb_student AS stu ");
+        sb.append(" LEFT JOIN( ");
+        sb.append(" tb_student_attendance AS sa ");
+        sb.append(" LEFT JOIN ");
+        sb.append(" tb_student_attendance_type AS sat ");
+        sb.append(" ON ");
+        sb.append(" sa.fk_student_attendance_type_id=sat.pk_student_attendance_type_id ");
+        sb.append(") ON ");
+        sb.append(" sa.fk_stu_id=stu.stu_id WHERE sa.fk_teacher_id=? AND sa.attendance_staus!=? ");
+        //------------------查询条件begin------------------------
+        if (stuId != null) {
+            if (dateMin != null && dateMax != null) {
+                sb.append(" AND stu.stu_id=? AND sa.attendance_add_date between ? AND ? LIMIT ?,?");
+                psmt = connection.prepareStatement(sb.toString());
+                psmt.setInt(1, teacherId);
+                psmt.setInt(2, StudentAttendanceConstant.STUDENT_ATTENDANCE_STATUS_DELETED);
+                psmt.setString(3, stuId);
+                psmt.setString(4, dateMin);
+                psmt.setString(5, dateMax);
+                psmt.setInt(6, (currentPage - 1)*pageSize);
+                psmt.setInt(7, pageSize);
+            }else {
+                sb.append(" AND stu.stu_id=? LIMIT ?,?");
+                psmt = connection.prepareStatement(sb.toString());
+                psmt.setInt(1, teacherId);
+                psmt.setInt(2, StudentAttendanceConstant.STUDENT_ATTENDANCE_STATUS_DELETED);
+                psmt.setString(3, stuId);
+                psmt.setInt(4, (currentPage - 1)*pageSize);
+                psmt.setInt(5, pageSize);
+            }
+        }else {
+            if (dateMin != null && dateMax != null) {
+                sb.append(" AND sa.attendance_add_date between ? AND ? LIMIT ?,?");
+                psmt = connection.prepareStatement(sb.toString());
+                psmt.setInt(1, teacherId);
+                psmt.setInt(2, StudentAttendanceConstant.STUDENT_ATTENDANCE_STATUS_DELETED);
+                psmt.setString(3, dateMin);
+                psmt.setString(4, dateMax);
+                psmt.setInt(5, (currentPage - 1)*pageSize);
+                psmt.setInt(6, pageSize);
+            }
+        }
+        //------------------查询条件end------------------------
+        ResultSet rs = psmt.executeQuery();
+        List<StudentAttendance> studentAttendances = new ArrayList<StudentAttendance>();
+        StudentAttendance studentAttendance = null;
+        StudentAttendanceType studentAttendanceType = null;
+        Student student = null;
+        
+        while (rs.next()) {
+            student = new Student(rs.getString("stu_id"), rs.getString("stu_name"));
+            studentAttendanceType = new StudentAttendanceType(rs.getInt("pk_student_attendance_type_id"), rs.getString("student_attendance_type_name"));
+            studentAttendance = new StudentAttendance(rs.getString("pk_attendance_id"), new Teacher(teacherId), student, studentAttendanceType, rs.getTime("attendance_default_start_time"), rs.getTime("attendance_default_end_time"), rs.getTime("attendance_actual_start_time"), rs.getTime("attendance_actual_end_time"), rs.getLong("attendance_actual_time_length"), rs.getString("attendance_description"), rs.getDate("attendance_add_date"), StudentAttendanceConstant.STUDENT_ATTENDANCE_STATUS_NORMAL);
+            studentAttendances.add(studentAttendance);
+        }
+        C3P0Utils.closeAll(rs, psmt, connection);
+        return studentAttendances;
     }
 
 }

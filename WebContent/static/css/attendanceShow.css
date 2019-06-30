@@ -9,3 +9,15 @@
     text-align: center;
     padding: 10px 0;
 }
+
+#select-box .layui-form-label{
+	width: 200px;
+}
+
+#select-box .layui-form-item .layui-input-inline{
+	width: auto !important;
+}
+
+#select-box{
+	vertical-align: middle;
+}
